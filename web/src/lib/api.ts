@@ -1,9 +1,13 @@
 import type { Batch, DiscoveredPrinter, Printer, PrintJobStatus } from "./types";
 
 const SERVER_URL_KEY = "printer-app:server-url";
+// Baked in at build time (e.g. Railway env var) so a deployed web app can
+// ship pre-configured with its backend's URL instead of requiring every
+// visitor to type it into Settings manually.
+const BUILD_TIME_DEFAULT = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export function getServerUrl(): string {
-  return localStorage.getItem(SERVER_URL_KEY) ?? "";
+  return localStorage.getItem(SERVER_URL_KEY) ?? BUILD_TIME_DEFAULT;
 }
 
 export function setServerUrl(url: string): void {
