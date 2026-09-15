@@ -1,0 +1,93 @@
+page {
+  background: #f4f6fb;
+  color: #1a2333;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.hint {
+  color: #667085;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 24rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.input {
+  flex: 1;
+  border: 1px solid #e3e7ef;
+  border-radius: 10rpx;
+  padding: 14rpx 18rpx;
+  background: #fff;
+}
+
+.btn-primary {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+
+.code-value {
+  font-size: 56rpx;
+  font-weight: 700;
+  letter-spacing: 6rpx;
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 0;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.file-thumb {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 8rpx;
+  background: #f0f2f7;
+  flex-shrink: 0;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 26rpx;
+  word-break: break-all;
+}
+
+.file-status {
+  font-size: 22rpx;
+  color: #667085;
+}
+
+.file-status.done {
+  color: #16a34a;
+}
+
+.file-status.error {
+  color: #dc2626;
+}

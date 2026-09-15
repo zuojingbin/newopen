@@ -1,0 +1,14 @@
+{
+  "miniprogramRoot": "./",
+  "compileType": "miniprogram",
+  "projectname": "wechat-file-printer",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true
+  },
+  "libVersion": "3.4.0"
+}

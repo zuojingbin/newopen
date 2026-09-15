@@ -1,0 +1,10 @@
+{
+  "pages": ["pages/index/index", "pages/settings/settings"],
+  "window": {
+    "navigationBarTitleText": "作业打印助手",
+    "navigationBarBackgroundColor": "#2563eb",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f6fb"
+  },
+  "sitemapLocation": "sitemap.json"
+}

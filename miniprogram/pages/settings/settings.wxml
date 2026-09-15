@@ -1,0 +1,13 @@
+<view class="section">
+  <view class="section-title">后端服务地址</view>
+  <view class="hint">
+    和电脑/手机上打开的网页版填的是同一个地址，例如 https://printer.example.com。
+    正式发布小程序前，还需要把这个域名加到小程序管理后台「服务器域名」的 request 合法域名列表里，否则线上版本请求会被微信拦截。
+  </view>
+  <view class="row">
+    <input class="input" value="{{serverUrl}}" placeholder="https://your-server.example.com" bindinput="onInput" />
+  </view>
+  <view class="row">
+    <button class="btn-primary" bindtap="onSave">保存</button>
+  </view>
+</view>

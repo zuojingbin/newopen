@@ -1,44 +1,65 @@
-**English** | [中文](https://p3terx.com/archives/build-openwrt-with-github-actions.html)
+# 作业打印助手
 
-# Actions-OpenWrt
+手机和电脑通用：把老师发布在微信群里的图片/PDF 导入进来，自动按顺序排版，
+把 A3 页面自动拆成两页 A4，再连接局域网或远程的打印机打印出来。
 
-[![LICENSE](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square&label=LICENSE)](https://github.com/P3TERX/Actions-OpenWrt/blob/master/LICENSE)
-![GitHub Stars](https://img.shields.io/github/stars/P3TERX/Actions-OpenWrt.svg?style=flat-square&label=Stars&logo=github)
-![GitHub Forks](https://img.shields.io/github/forks/P3TERX/Actions-OpenWrt.svg?style=flat-square&label=Forks&logo=github)
+## 整体架构
 
-A template for building OpenWrt with GitHub Actions
+```
+miniprogram/  微信小程序 —— 用官方 wx.chooseMessageFile 从聊天记录(含群聊)选图片/文件
+    │  上传（批次码关联）
+    ▼
+server/       后端服务 —— 批次/文件管理、自动排序、A3拆A4排版、局域网IPP打印、远程打印任务队列
+    ▲  同一套 API
+    │
+web/          响应式网页/PWA —— 手机和电脑打开同一地址：导入、拖拽排版、选打印机、打印
 
-## Usage
+printer-agent/ 打印代理 —— 跑在"远程"打印机所在局域网内，轮询后端任务、就地用IPP打印
+```
 
-- Click the [Use this template](https://github.com/P3TERX/Actions-OpenWrt/generate) button to create a new repository.
-- Generate `.config` files using [Lean's OpenWrt](https://github.com/coolsnowwolf/lede) source code. ( You can change it through environment variables in the workflow file. )
-- Push `.config` file to the GitHub repository.
-- Select `Build OpenWrt` on the Actions page.
-- Click the `Run workflow` button.
-- When the build is complete, click the `Artifacts` button in the upper right corner of the Actions page to download the binaries.
+四个部分各自独立部署、独立的 `package.json`，进各自目录看 README：
 
-## Tips
+- [`server/`](./server/README.md) —— 后端服务（先部署这个，其它三个都要连它）
+- [`web/`](./web/README.md) —— 手机/电脑通用的网页版
+- [`miniprogram/`](./miniprogram/README.md) —— 微信小程序（聊天记录导入入口）
+- [`printer-agent/`](./printer-agent/README.md) —— 远程打印机的代理程序
 
-- It may take a long time to create a `.config` file and build the OpenWrt firmware. Thus, before create repository to build your own firmware, you may check out if others have already built it which meet your needs by simply [search `Actions-Openwrt` in GitHub](https://github.com/search?q=Actions-openwrt).
-- Add some meta info of your built firmware (such as firmware architecture and installed packages) to your repository introduction, this will save others' time.
+## 关键设计取舍
 
-## Credits
+**为什么"导入微信群图片"是走小程序 + 手动选择，而不是自动抓取？**
+微信没有开放 API 允许第三方程序自动读取群聊消息，这类自动抓取通常需要逆向微信内部协议，
+违反平台规则且极易封号。小程序里用的 `wx.chooseMessageFile` 是官方开放、允许在小程序内
+调起微信原生"聊天记录选择器"、从任意会话（含群聊）里勾选文件的接口——用户仍需在微信里点一下选择，
+但不需要先手动保存到相册/文件再切换 App 导入，是在"合规"前提下最省事的方案。
 
-- [Microsoft Azure](https://azure.microsoft.com)
-- [GitHub Actions](https://github.com/features/actions)
-- [OpenWrt](https://github.com/openwrt/openwrt)
-- [Lean's OpenWrt](https://github.com/coolsnowwolf/lede)
-- [tmate](https://github.com/tmate-io/tmate)
-- [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate)
-- [csexton/debugger-action](https://github.com/csexton/debugger-action)
-- [Cowtransfer](https://cowtransfer.com)
-- [WeTransfer](https://wetransfer.com/)
-- [Mikubill/transfer](https://github.com/Mikubill/transfer)
-- [softprops/action-gh-release](https://github.com/softprops/action-gh-release)
-- [ActionsRML/delete-workflow-runs](https://github.com/ActionsRML/delete-workflow-runs)
-- [dev-drprasad/delete-older-releases](https://github.com/dev-drprasad/delete-older-releases)
-- [peter-evans/repository-dispatch](https://github.com/peter-evans/repository-dispatch)
+**为什么局域网打印机和远程打印机是两套机制？**
+局域网打印机用的 IPP 协议是打印机之间/打印机与电脑之间通用的标准协议，`server` 只要和打印机在
+同一局域网就能直接发现、直接打印，不需要额外部署任何东西。但如果打印机和使用者不在同一网络
+（比如打印机在家、人在学校），`server` 没法直接连到那台打印机——`printer-agent` 就是解决这个的：
+在打印机所在局域网内跑一个小程序，主动轮询 `server` 要任务，再就地打印，打印机本身不需要暴露公网。
 
-## License
+**A3 拆 A4 怎么判断"这页是不是 A3"？**
+PDF 里的页面尺寸是精确物理量，直接比对标准 A3/A4 尺寸即可可靠判断。但手机拍的照片/扫描件
+没有物理尺寸信息，只能按长宽比+像素做启发式默认猜测，网页版里每张图都可以手动勾选/取消"标记为 A3"
+来纠正——这是唯一可靠的兜底方式，详见 `server/src/services/paperSize.ts`。
 
-[MIT](https://github.com/P3TERX/Actions-OpenWrt/blob/main/LICENSE) © [**P3TERX**](https://p3terx.com)
+## 快速开始（本地跑通整条链路）
+
+```bash
+# 1. 启动后端
+cd server && npm install && npm run dev
+
+# 2. 另开一个终端启动网页版
+cd web && npm install && npm run dev
+# 打开网页后，"设置"里填 http://localhost:4000（server 的地址）
+
+# 3.（可选）微信开发者工具导入 miniprogram/ 目录，"设置"里同样填 http://localhost:4000
+#    需要在开发者工具里勾掉"不校验合法域名"才能连本地 server
+
+# 4.（可选，测试远程打印）另开终端跑 printer-agent
+cd printer-agent && npm install
+SERVER_URL=http://localhost:4000 PRINTER_URI=ipp://<你的打印机IP>:631/ipp/print npm run dev
+```
+
+网页版：新建批次拿到批次码 → 拖拽/选择图片和 PDF 导入（或用小程序从微信聊天记录导入同一批次码）→
+"自动排序" → 需要的话手动标记某页为 A3 → "生成打印 PDF" → 去"打印机"页扫描/选择打印机 → 打印。
