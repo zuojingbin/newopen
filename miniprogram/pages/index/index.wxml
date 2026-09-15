@@ -1,0 +1,48 @@
+<view class="section">
+  <view class="section-title">服务器</view>
+  <view class="hint">{{serverUrl ? serverUrl : '尚未设置服务器地址'}}</view>
+  <view class="row">
+    <button size="mini" bindtap="goSettings">{{serverUrl ? '修改' : '去设置'}}</button>
+  </view>
+</view>
+
+<view class="section">
+  <view class="section-title">批次码</view>
+  <view class="hint">先在电脑/手机网页版创建批次并拿到批次码，输入到下面；或者点「新建批次」直接在这里创建一个。</view>
+  <view class="code-value" wx:if="{{code}}">{{code}}</view>
+  <view class="row">
+    <input class="input" value="{{codeInput}}" placeholder="输入批次码" bindinput="onCodeInput" />
+    <button size="mini" bindtap="joinBatch">加入</button>
+  </view>
+  <view class="row">
+    <button size="mini" class="btn-primary" bindtap="newBatch">新建批次</button>
+  </view>
+</view>
+
+<view class="section">
+  <view class="section-title">选择要导入的图片/文件</view>
+  <view class="hint">从微信聊天记录（含群聊）里选老师发的图片或 PDF，也可以从手机相册选图片。</view>
+  <view class="row">
+    <button class="btn-primary" bindtap="chooseFromChat">从聊天记录选择</button>
+  </view>
+  <view class="row">
+    <button bindtap="chooseFromAlbum">从手机相册选择图片</button>
+  </view>
+
+  <view wx:if="{{selected.length}}">
+    <view class="file-item" wx:for="{{selected}}" wx:key="index">
+      <image wx:if="{{item.type === 'image'}}" class="file-thumb" src="{{item.path}}" mode="aspectFill" />
+      <view wx:else class="file-thumb" />
+      <view class="file-name">{{item.name}}</view>
+      <view class="file-status {{item.status}}">{{item.statusText}}</view>
+      <button size="mini" bindtap="removeSelected" data-index="{{index}}" wx:if="{{!item.uploaded}}">移除</button>
+    </view>
+  </view>
+
+  <view class="row" wx:if="{{selected.length}}">
+    <button class="btn-primary" bindtap="uploadAll" loading="{{uploading}}" disabled="{{!code || uploading}}">
+      上传到批次 {{code || '（未设置）'}}
+    </button>
+  </view>
+  <view class="error" wx:if="{{errorText}}">{{errorText}}</view>
+</view>
